@@ -22,6 +22,7 @@ export async function createUserHandler(
     });
 
     res.status(201).send("User successfully created");
+    return;
 
   } catch (err: unknown) {
     log.error(err, "Error creating user");
@@ -36,6 +37,7 @@ export async function createUserHandler(
     }
 
     res.status(500).send("Internal Server Error"); 
+    return;
   }
 }
 
@@ -66,8 +68,10 @@ export async function verifyUserHandler(
     }
 
     res.status(400).send("Invalid verification code");
+    return; 
   } catch (err) {
-    log.error(err);
+    log.error(err, "Error verifying user");
     res.status(500).send("Internal server error");
+    return; 
   }
 }

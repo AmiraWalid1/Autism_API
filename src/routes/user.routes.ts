@@ -6,6 +6,6 @@
     const router = express.Router();
 
     router.post("/api/users", validateResource(createUserSchema), createUserHandler);
-    router.get("/api/users/verify/:id/:verificationCode", validateResource(verifyUserSchema), verifyUserHandler);
+    router.patch("/api/users/verify/:id/:verificationCode", validateResource(verifyUserSchema), verifyUserHandler);
 
     export default router;
