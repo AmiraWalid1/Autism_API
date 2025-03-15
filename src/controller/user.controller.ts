@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
-import { CreateUserInput, VerifyUserInput  } from "../schema/user.schema";
-import { createUser, findUserById } from "../services/user.service";
+import { v4 as uuidv4 } from 'uuid';
+import { CreateUserInput, ForgetPasswordInput, VerifyUserInput  } from "../schema/user.schema";
+import { createUser, findUserByEmail, findUserById } from "../services/user.service";
 import log from "../utils/logger";
 import sendEmail from "../utils/mailer";
 import { User } from "../models/user.model";
@@ -74,4 +75,44 @@ export async function verifyUserHandler(
     res.status(500).send("Internal server error");
     return; 
   }
+}
+
+export async function forgetPasswordHandler(
+  req: Request<{}, {}, ForgetPasswordInput>,
+  res: Response
+){
+  const message =
+    "If a user with that email is registered you will receive a password reset email";
+
+  const {email} = req.body;
+
+  const user = await findUserByEmail(email);
+
+  if (!user){
+    log.debug(`User with email ${email} does not exist`);
+    res.send(message);
+    return;
+  }
+
+  if (!user.verified){
+    res.send('User is not verified');
+    return;
+  }
+
+  const passwordResetCode = uuidv4();
+  user.passwordResetCode = passwordResetCode;
+  
+  await user.save();
+
+  await sendEmail({
+    from: 'test@gmail.com',
+    to: user.email,
+    subject: "Reset your password",
+    text: `Password reset code: ${user.passwordResetCode}, ID: ${user._id}`
+  })
+
+  log.debug(`Password reset code sent to ${email}`);
+  
+  res.send(message);
+  return;
 }
