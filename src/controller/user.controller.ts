@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { v4 as uuidv4 } from 'uuid';
-import { CreateUserInput, ForgetPasswordInput, VerifyUserInput  } from "../schema/user.schema";
+import { CreateUserInput, ForgetPasswordInput, ResetPasswordInput, VerifyUserInput  } from "../schema/user.schema";
 import { createUser, findUserByEmail, findUserById } from "../services/user.service";
 import log from "../utils/logger";
 import sendEmail from "../utils/mailer";
@@ -115,4 +115,32 @@ export async function forgetPasswordHandler(
   
   res.send(message);
   return;
+}
+
+export async function resetPasswordHandler(
+  req: Request<ResetPasswordInput["params"], {}, ResetPasswordInput["body"]>,
+  res: Response
+){
+  const {id, passwordResetCode} = req.params;
+  const {password} = req.body;
+
+  const user = await findUserById(id);
+
+  if (!user ||
+    !user.passwordResetCode ||
+    user.passwordResetCode !== passwordResetCode){
+    res.status(400).send('Could not reset user password')
+    return;
+  }
+
+  user.passwordResetCode = null;
+
+  user.password = password;
+
+  user.save();
+
+  res.send("Successfully updated password");
+  return;
+ 
+  
 }
