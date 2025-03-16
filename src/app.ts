@@ -4,25 +4,23 @@ import config from 'config'
 import dbConnection from './utils/dbConnection';
 import log from './utils/logger';
 import router from './routes';
+import deserializeUser from './middleware/deserializeUser';
 
 // import morgan from 'morgan';
-
-// const authRoutes = require('./routes/auth');
 
 
 const app=express();
 
 
-// // Middlewares
+// Middlewares
 app.use(express.json());
+
+app.use(deserializeUser);
 
 // if (process.env.NODE_ENV == "development"){
 //     app.use(morgan('dev'));
 //     console.log(`mode: ${process.env.NODE_ENV}`);
 // }
-
-
-
 
 app.use(router);
 

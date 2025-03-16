@@ -13,14 +13,14 @@ const smtp = config.get<{
     user: string;
     pass: string;
     host: string;
-    port: number;
-    secure: boolean;
+    port: string;
+    secure: string;
 }>('smtp');
 
 const transporter = nodemailer.createTransport({
     host: smtp.host,
-    port: smtp.port,
-    secure: smtp.secure,
+    port: parseInt(smtp.port, 10),
+    secure: smtp.secure === "true",
     auth: {
         user: smtp.user,
         pass: smtp.pass

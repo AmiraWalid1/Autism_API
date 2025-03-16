@@ -22,6 +22,8 @@ export function verifyJwt<T>(token: string,
     const publicKey = Buffer.from(config.get<string>(keyname),"base64").toString("ascii");
 
     try{
+        // Returns the decoded payload if the token is valid
+        // or null if the token is invalid or verification fails.
         const decoded = jwt.verify(token, publicKey) as T;
         return decoded;
     }catch(err){
