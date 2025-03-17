@@ -2,6 +2,7 @@ import { getModelForClass, modelOptions, pre, prop, Severity, DocumentType, inde
 import { v4 as uuidv4 } from 'uuid';
 import argon2 from 'argon2'
 import log from "../utils/logger";
+import { customAlphabet } from 'nanoid';
 
 export enum UserRole {
     DOCTOR = "doctor",
@@ -39,12 +40,15 @@ export class User{
     password: string;
 
     @prop({required: true})
+    passwordConfirmation: string;
+
+    @prop({required: true})
     phoneNumber: number;
 
     @prop({required: true, enum: UserRole})
     role: UserRole;
 
-    @prop({required: true, default: () => uuidv4() })
+    @prop({required: true, default: () => customAlphabet(uuidv4(), 4) })
     verificationCode: string;
 
     @prop()

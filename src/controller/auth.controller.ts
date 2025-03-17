@@ -30,7 +30,7 @@ export async function createSessionHandler(
     }
 
     // sign a access token
-    const accessToken = signAccessToken(user);
+    const accessToken = signAccessToken({userId: user._id.toString(), role: user.role});
 
     // sign a refresh token
     const refreshToken = await signRefreshToken({userId: user._id.toString()});

@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { v4 as uuidv4 } from 'uuid';
+import { customAlphabet } from 'nanoid';
 import { CreateUserInput, ForgetPasswordInput, ResetPasswordInput, VerifyUserInput  } from "../schema/user.schema";
 import { createUser, findUserByEmail, findUserById } from "../services/user.service";
 import log from "../utils/logger";
@@ -19,7 +20,7 @@ export async function createUserHandler(
       from: 'test@gmail.com',
       to: user.email,
       subject: "Please verify your account",
-      text: `Verification code: ${user.verificationCode}, ID: ${user._id}`
+      text: `Verification code: ${user.verificationCode}`
     });
 
     res.status(201).send("User successfully created");
@@ -46,10 +47,10 @@ export async function verifyUserHandler(
   req: Request<VerifyUserInput>,
   res: Response
 ) {
-  const { id, verificationCode } = req.params;
+  const { email, verificationCode } = req.params;
 
   try {
-    const user = await findUserById(id);
+    const user = await findUserByEmail(email);
 
     if (!user) {
       res.status(404).send("User not found");
@@ -69,7 +70,8 @@ export async function verifyUserHandler(
     }
 
     res.status(400).send("Invalid verification code");
-    return; 
+    return;
+
   } catch (err) {
     log.error(err, "Error verifying user");
     res.status(500).send("Internal server error");
@@ -99,8 +101,8 @@ export async function forgetPasswordHandler(
     return;
   }
 
-  const passwordResetCode = uuidv4();
-  user.passwordResetCode = passwordResetCode;
+  const passwordResetCode = customAlphabet(uuidv4(), 4);
+  user.passwordResetCode = passwordResetCode();
   
   await user.save();
 
@@ -108,7 +110,7 @@ export async function forgetPasswordHandler(
     from: 'test@gmail.com',
     to: user.email,
     subject: "Reset your password",
-    text: `Password reset code: ${user.passwordResetCode}, ID: ${user._id}`
+    text: `Password reset code: ${user.passwordResetCode}`
   })
 
   log.debug(`Password reset code sent to ${email}`);
@@ -121,10 +123,10 @@ export async function resetPasswordHandler(
   req: Request<ResetPasswordInput["params"], {}, ResetPasswordInput["body"]>,
   res: Response
 ){
-  const {id, passwordResetCode} = req.params;
+  const {email, passwordResetCode} = req.params;
   const {password} = req.body;
 
-  const user = await findUserById(id);
+  const user = await findUserByEmail(email);
 
   if (!user ||
     !user.passwordResetCode ||

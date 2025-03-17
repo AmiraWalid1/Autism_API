@@ -9,12 +9,12 @@ const deserializeUser = async (
     /^Bearer\s/,
     ""
   );
-
+  
   if (!accessToken) {
     return next();
   }
 
-  const decoded = verifyJwt(accessToken, "accessTokenPublicKey");
+  const decoded = await verifyJwt(accessToken, "accessTokenPublicKey");
 
   if (decoded) {
     res.locals.user = decoded;

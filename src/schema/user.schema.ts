@@ -36,9 +36,12 @@ export const createUserSchema = z.object({
 
 export const verifyUserSchema = z.object({
     params: z.object({
-        id: z.string({
-            required_error: "id is required"
-        }),
+        email: z.string({
+            required_error: "Email is required"
+        })
+        .email("Invalid Email")
+        .transform((val) => val.toLowerCase()),
+
         verificationCode: z.string({
             required_error: "verificationCode is required"
         })
@@ -57,7 +60,12 @@ export const forgetPasswordSchema = z.object({
 
 export const resetPasswordSchema = z.object({
     params: z.object({
-        id: z.string({ required_error: "id is required" }),
+        email: z.string({
+            required_error: "Email is required"
+        })
+        .email("Invalid Email")
+        .transform((val) => val.toLowerCase()),
+
         passwordResetCode: z.string({ 
             required_error: "passwordResetCode is required" 
         })
