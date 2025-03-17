@@ -16,14 +16,14 @@ export async function createUserHandler(
   try {
     const user = await createUser(body);
     
-    await sendEmail({
+    const viewEmail = await sendEmail({
       from: 'test@gmail.com',
       to: user.email,
       subject: "Please verify your account",
       text: `Verification code: ${user.verificationCode}`
     });
 
-    res.status(201).send("User successfully created");
+    res.status(201).send(`User successfully created\n${viewEmail}`);
     return;
 
   } catch (err: unknown) {
@@ -106,14 +106,14 @@ export async function forgetPasswordHandler(
   
   await user.save();
 
-  await sendEmail({
+  const viewEmail = await sendEmail({
     from: 'test@gmail.com',
     to: user.email,
     subject: "Reset your password",
     text: `Password reset code: ${user.passwordResetCode}`
   })
 
-  log.debug(`Password reset code sent to ${email}`);
+  log.debug(`Password reset code sent to ${email}\n${viewEmail}`);
   
   res.send(message);
   return;
