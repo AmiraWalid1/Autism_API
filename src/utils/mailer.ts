@@ -33,7 +33,7 @@ async function sendEmail(payload: SendMailOptions){
             return;
         }
         log.info(`Preview URL: ${nodemailer.getTestMessageUrl(info)}`);
-        return `Preview URL: ${nodemailer.getTestMessageUrl(info)}`;
+
     })
 }
 

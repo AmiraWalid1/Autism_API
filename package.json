@@ -26,6 +26,7 @@
     "nanoid": "^2.1.11",
     "nodemailer": "^6.10.0",
     "pino": "^9.6.0",
+    "shortid": "^2.2.17",
     "uuid": "^11.1.0",
     "zod": "^3.24.2"
   },
@@ -37,6 +38,7 @@
     "@types/morgan": "^1.9.9",
     "@types/nanoid": "^3.0.0",
     "@types/nodemailer": "^6.4.17",
+    "@types/shortid": "^2.2.0",
     "@types/uuid": "^10.0.0",
     "pino-pretty": "^13.0.0",
     "ts-node": "^10.9.2",

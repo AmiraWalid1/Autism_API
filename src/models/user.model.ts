@@ -2,7 +2,8 @@ import { getModelForClass, modelOptions, pre, prop, Severity, DocumentType, inde
 import { v4 as uuidv4 } from 'uuid';
 import argon2 from 'argon2'
 import log from "../utils/logger";
-import { customAlphabet } from 'nanoid';
+import shortid from 'shortid';
+import { generate4DigitCode } from "../utils/generateCode";
 
 export enum UserRole {
     DOCTOR = "doctor",
@@ -19,7 +20,7 @@ export enum UserRole {
     return;
 })
 
-// @index({email : 1})
+@index({email : 1}, { unique: true })
 
 @modelOptions({ 
     schemaOptions: {
@@ -47,8 +48,7 @@ export class User{
 
     @prop({required: true, enum: UserRole})
     role: UserRole;
-
-    @prop({required: true, default: () => customAlphabet(uuidv4(), 4) })
+    @prop({required: true, default: () => generate4DigitCode()})
     verificationCode: string;
 
     @prop()
