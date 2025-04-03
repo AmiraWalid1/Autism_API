@@ -10,6 +10,14 @@ export enum UserRole {
     PARENT = "parent",
 }
 
+export const privateFields = [
+    "password",
+    "passwordConfirmation",
+    "__v",
+    "verificationCode",
+    "passwordResetCode",
+    "verified"
+];
 @pre<User>("save", async function() {
     if (!this.isModified('password')){
         return;
@@ -41,13 +49,11 @@ export class User{
     password: string;
 
     @prop({required: true})
-    passwordConfirmation: string;
-
-    @prop({required: true})
     phoneNumber: number;
 
     @prop({required: true, enum: UserRole})
     role: UserRole;
+    
     @prop({required: true, default: () => generate4DigitCode()})
     verificationCode: string;
 

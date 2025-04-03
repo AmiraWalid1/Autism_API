@@ -17,14 +17,14 @@ export async function createUserHandler(
   try {
     const user = await createUser(body);
 
-    await sendEmail({
+    const emailContent = await sendEmail({
       from: 'test@gmail.com',
       to: user.email,
       subject: "Please verify your account",
       text: `Verification code: ${user.verificationCode}`
     });
 
-    res.status(201).send("User successfully created");
+    res.status(201).send(`User successfully created\n ${emailContent}`);
     return;
   } catch (err: unknown) {
     log.error(err, "Error creating user");
@@ -105,7 +105,7 @@ export async function forgetPasswordHandler(
     user.passwordResetCode = passwordResetCode;
     await user.save();
 
-    await sendEmail({
+    const emailContent = await sendEmail({
       from: 'test@gmail.com',
       to: user.email,
       subject: "Reset your password",
@@ -113,7 +113,7 @@ export async function forgetPasswordHandler(
     });
 
     log.debug(`Password reset code sent to ${email}`);
-    res.status(200).send(message);
+    res.status(200).send(`${message}\n ${emailContent}`);
     return;
   } catch (err) {
     log.error(err, "Error in forgetPasswordHandler");

@@ -3,6 +3,9 @@ import { CreateSessionInput } from "../schema/auth.schema";
 import { findUserByEmail } from "../services/user.service";
 import { signAccessToken, signRefreshToken } from "../services/auth.service";
 import log from "../utils/logger";
+import { get } from "lodash";
+import { verifyJwt } from "../utils/jwt";
+
 
 export async function createSessionHandler(
     req: Request<{}, {}, CreateSessionInput>,
@@ -42,6 +45,32 @@ export async function createSessionHandler(
     }catch (err) {
         log.error("Error in createSessionHandler:", err);
         res.status(500).send("Internal server error"); // 500 Internal Server Error
+        return ;
+    }
+}
+
+export async function refreshAccessTokenHandler(
+    req: Request,
+    res: Response
+){
+    const refreshToken = get(req, 'headers.x-refresh') as string;
+    if(!refreshToken){
+        res.status(401).json({ message: "Refresh token is required" });
+        return ;
+    }
+    try{
+        const decoded = await verifyJwt(refreshToken, "refreshTokenPublicKey");
+
+        if (!decoded) {
+            res.status(401).json({ message: "Could not refresh access token" });
+            return;
+        }
+
+       
+        return ;
+    } catch (err) {
+        log.error(err, "Error verifying JWT");
+        res.status(401).send("Invalid or expired token");
         return ;
     }
 }
