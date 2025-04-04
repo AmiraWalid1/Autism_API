@@ -84,7 +84,17 @@ export const resetPasswordSchema = z.object({
     }),
 });
 
+
+export const updateUserSchema = z.object({
+    body: z.object({
+        name: z.string().optional(),
+        email: z.string().email("Invalid Email").optional(), 
+        phoneNumber: z.number().optional(), 
+    }),
+});
+
 export type CreateUserInput = z.TypeOf<typeof createUserSchema>["body"];
 export type VerifyUserInput = z.TypeOf<typeof verifyUserSchema>["params"];
 export type ForgetPasswordInput = z.TypeOf<typeof forgetPasswordSchema>["body"];
 export type ResetPasswordInput = z.TypeOf<typeof resetPasswordSchema>;
+export type UpdateUserInput = z.TypeOf<typeof updateUserSchema>["body"];
