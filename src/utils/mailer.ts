@@ -26,14 +26,26 @@ const transporter = nodemailer.createTransport({
         pass: smtp.pass
     }
 })
-async function sendEmail(payload: SendMailOptions){
-    transporter.sendMail(payload, (err, info)=> {
-        if (err){
-            log.error(err, "Error sending email");
-            return;
-        }
-        log.info(`Preview URL: ${nodemailer.getTestMessageUrl(info)}`);
-    })
+
+async function sendEmail(payload: SendMailOptions): Promise<string> {
+    return new Promise((resolve, reject) => {
+        transporter.sendMail(payload, (err, info) => {
+            if (err) {
+                log.error(err, "Error sending email");
+                reject(err);
+                return;
+            }
+            
+            const previewUrl = nodemailer.getTestMessageUrl(info);
+            log.info(`Preview URL: ${previewUrl}`);
+            
+            if (previewUrl) {
+                resolve(`Preview URL: ${previewUrl}`);
+            } else {
+                resolve("Email sent successfully");
+            }
+        });
+    });
 }
 
 export default sendEmail;
