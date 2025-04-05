@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { customAlphabet } from 'nanoid';
 import { CreateUserInput, ForgetPasswordInput, ResetPasswordInput, VerifyUserInput , UpdateUserInput } from "../schema/user.schema";
 import { createUser, findUserByEmail, findUserById , updateUser , deleteUser , getAllUsersById , getAllUsers , getUsersByRole} from "../services/user.service";
+import { UserRole } from "../models/user.model";
 
 /*import shortid from 'shortid';
 import { CreateUserInput, ForgetPasswordInput, ResetPasswordInput, VerifyUserInput } from "../schema/user.schema";
@@ -154,21 +155,7 @@ export async function resetPasswordHandler(
     res.status(500).send("Internal server error");
     return;
   }
-
-
-/* user.passwordResetCode = null;
-
-  user.password = password;
-
-  user.save();
-
-  res.send("Successfully updated password");
-  return;
-
-  
-
-
-}*/
+}
 
 export async function getCurrentUserHandler(
   req: Request,
@@ -277,22 +264,19 @@ export async function getAllUsersHandler(req: Request, res: Response) {
   }
 }
 
-export enum UserRole {
-  Parent = 'parent',
-  Doctor = 'doctor'
-}
 
 export async function getUsersByRoleHandler(
-  req: Request<{}, {}, {}, { role: UserRole }>,
+  req: Request,
   res: Response
 ) {
-  const { role } = req.query;
+  const { role } = req.query as { role: UserRole };
 
   if (!role || !Object.values(UserRole).includes(role)) {
-    return res.status(400).json({
+    res.status(400).json({
       success: false,
       message: "Invalid role. Role must be 'parent' or 'doctor'"
     });
+    return;
   }
 
   try {
