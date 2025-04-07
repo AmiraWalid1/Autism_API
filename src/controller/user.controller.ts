@@ -71,7 +71,7 @@ export async function verifyUserHandler(
     if (user.verificationCode === verificationCode) {
       user.verified = true;
       await user.save();
-      res.status(200).send("User successfully verified");
+      res.status(200).send("User successfully verified, Please login!");
       return;
     } else {
       res.status(400).send("Invalid verification code");
