@@ -6,10 +6,6 @@ import { CreateUserInput, ForgetPasswordInput, ResetPasswordInput, VerifyUserInp
 import { createUser, findUserByEmail, findUserById , updateUser , deleteUser , getAllUsersById , getAllUsers , getUsersByRole} from "../services/user.service";
 import { UserRole } from "../models/user.model";
 
-/*import shortid from 'shortid';
-import { CreateUserInput, ForgetPasswordInput, ResetPasswordInput, VerifyUserInput } from "../schema/user.schema";
-import { createUser, findUserByEmail, findUserById } from "../services/user.service";*/
-
 import log from "../utils/logger";
 import sendEmail from "../utils/mailer";
 import { User } from "../models/user.model";
@@ -24,14 +20,17 @@ export async function createUserHandler(
   try {
     const user = await createUser(body);
 
-    const emailContent = await sendEmail({
+    const url = await sendEmail({
       from: 'test@gmail.com',
       to: user.email,
       subject: "Please verify your account",
       text: `Verification code: ${user.verificationCode}`
     });
 
-    res.status(201).send(`User successfully created\n ${emailContent}`);
+    res.status(201).json({
+      "message": `User successfully created`,
+      "Preview URL": url
+    });
     return;
   } catch (err: unknown) {
     log.error(err, "Error creating user");
@@ -65,7 +64,7 @@ export async function verifyUserHandler(
     }
 
     if (user.verified) {
-      res.status(400).send("User is already verified");
+      res.status(400).send("User is already verified, Please login!");
       return;
     }
 
@@ -112,7 +111,7 @@ export async function forgetPasswordHandler(
     user.passwordResetCode = passwordResetCode;
     await user.save();
 
-    const emailContent = await sendEmail({
+    const url = await sendEmail({
       from: 'test@gmail.com',
       to: user.email,
       subject: "Reset your password",
@@ -120,7 +119,11 @@ export async function forgetPasswordHandler(
     });
 
     log.debug(`Password reset code sent to ${email}`);
-    res.status(200).send(`${message}\n ${emailContent}`);
+    res.status(200).json({
+      "message": message,
+      "Preview URL": url
+    });
+    
     return;
   } catch (err) {
     log.error(err, "Error in forgetPasswordHandler");

@@ -40,7 +40,7 @@ async function sendEmail(payload: SendMailOptions): Promise<string> {
             log.info(`Preview URL: ${previewUrl}`);
             
             if (previewUrl) {
-                resolve(`Preview URL: ${previewUrl}`);
+                resolve(previewUrl);
             } else {
                 resolve("Email sent successfully");
             }
