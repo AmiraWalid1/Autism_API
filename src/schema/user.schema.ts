@@ -48,42 +48,47 @@ export const verifyUserSchema = z.object({
     })
 });
 
-export const forgetPasswordSchema = z.object({
-    body: z.object({
-        email: z.string({
-            required_error: "Email is required"
-        })
-        .email("Invalid Email")
+export const forgotPasswordSchema = z.object({
+  body: z.object({
+    email: z.string({
+      required_error: 'Email is required',
+    }).email('Invalid Email'),
+  }),
+});
 
+export const verifyResetCodeSchema = z.object({
+  body: z.object({
+    email: z.string({
+      required_error: 'Email is required',
     })
+      .email('Invalid Email')
+      .transform((val) => val.toLowerCase()),
+    passwordResetCode: z.string({
+      required_error: 'Reset code is required',
+    })
+      .length(4, 'Code must be exactly 4 digits')
+      .regex(/^\d{4}$/, 'Code must be numeric'),
+  }),
 });
 
 export const resetPasswordSchema = z.object({
-    params: z.object({
-        email: z.string({
-            required_error: "Email is required"
-        })
-        .email("Invalid Email")
-        .transform((val) => val.toLowerCase()),
-
-        passwordResetCode: z.string({ 
-            required_error: "passwordResetCode is required" 
-        })
+  body: z.object({
+    email: z.string({
+      required_error: 'Email is required',
+    })
+      .email('Invalid Email')
+      .transform((val) => val.toLowerCase()),
+    password: z.string({
+      required_error: 'Password is required',
+    }).min(6, 'Password is too short - should be min 6 chars'),
+    passwordConfirmation: z.string({
+      required_error: 'Password confirmation is required',
     }),
-    body: z.object({
-        password: z.string({
-            required_error: "Password is required"
-        })
-        .min(6, "Password is too short - should be min 6 chars"),
-        passwordConfirmation: z.string({
-            required_error: "Password confirmation is required",
-        }),
-    }).refine((data) => data.password === data.passwordConfirmation, {
-        message: "Passwords do not match",
-        path: ["passwordConfirmation"],
-    }),
+  }).refine((data) => data.password === data.passwordConfirmation, {
+    message: 'Passwords do not match',
+    path: ['passwordConfirmation'],
+  }),
 });
-
 
 export const updateUserSchema = z.object({
     body: z.object({
@@ -95,6 +100,7 @@ export const updateUserSchema = z.object({
 
 export type CreateUserInput = z.TypeOf<typeof createUserSchema>["body"];
 export type VerifyUserInput = z.TypeOf<typeof verifyUserSchema>["params"];
-export type ForgetPasswordInput = z.TypeOf<typeof forgetPasswordSchema>["body"];
-export type ResetPasswordInput = z.TypeOf<typeof resetPasswordSchema>;
+export type ForgetPasswordInput = z.TypeOf<typeof forgotPasswordSchema>["body"];
+export type VerifyResetCodeInput = z.TypeOf<typeof verifyResetCodeSchema>["body"];
+export type ResetPasswordInput = z.TypeOf<typeof resetPasswordSchema>["body"];
 export type UpdateUserInput = z.TypeOf<typeof updateUserSchema>["body"];
