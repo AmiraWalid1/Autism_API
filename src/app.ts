@@ -10,7 +10,7 @@ import deserializeUser from './middleware/deserializeUser';
 
 
 const app=express();
-const cors = require("cors");
+import cors from "cors";
 
 
 app.use(cors({
