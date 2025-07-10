@@ -10,7 +10,13 @@ import deserializeUser from './middleware/deserializeUser';
 
 
 const app=express();
+const cors = require("cors");
 
+
+app.use(cors({
+    origin: process.env.CORS_ORIGIN || '*', // Use environment variable or fallback to '*'
+    credentials: true, // Enable if sending cookies or authentication
+}));
 
 // Middlewares
 app.use(express.json());
