@@ -7,8 +7,8 @@ const router = express.Router();
 
 router.post(
     "/api/auth/login",
-   validateResource(createSessionSchema),
-   createSessionHandler
+    validateResource(createSessionSchema),
+    createSessionHandler
   );
 
 export default router;

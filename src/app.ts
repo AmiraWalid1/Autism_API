@@ -5,6 +5,10 @@ import dbConnection from './utils/dbConnection';
 import log from './utils/logger';
 import router from './routes';
 import deserializeUser from './middleware/deserializeUser';
+import { taskRouter } from './routes/taskRoutes';
+import { routineRouter } from './routes/routine.routes';
+import { consultationRouter } from './routes/consultationRoutes';
+
 
 // import morgan from 'morgan';
 
@@ -16,6 +20,13 @@ const app=express();
 app.use(express.json());
 
 app.use(deserializeUser);
+
+app.use('/api/task', taskRouter);
+
+app.use('/api/routine', routineRouter);
+
+app.use('/api/consultation', consultationRouter);
+
 
 // if (process.env.NODE_ENV == "development"){
 //     app.use(morgan('dev'));
