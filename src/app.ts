@@ -14,7 +14,13 @@ import { consultationRouter } from './routes/consultationRoutes';
 
 
 const app=express();
+import cors from "cors";
 
+
+app.use(cors({
+    origin: process.env.CORS_ORIGIN || '*', // Use environment variable or fallback to '*'
+    credentials: true, // Enable if sending cookies or authentication
+}));
 
 // Middlewares
 app.use(express.json());

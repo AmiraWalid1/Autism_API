@@ -60,6 +60,9 @@ export class User{
     @prop()
     passwordResetCode: string | null;
 
+    @prop({ default: null })
+    resetPasswordExpires: Date | null;
+
     @prop({default: false})
     verified: boolean;
 

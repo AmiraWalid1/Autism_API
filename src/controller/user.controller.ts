@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { v4 as uuidv4 } from 'uuid';
 
 import { customAlphabet } from 'nanoid';
-import { CreateUserInput, ForgetPasswordInput, ResetPasswordInput, VerifyUserInput , UpdateUserInput } from "../schema/user.schema";
+import { CreateUserInput, ForgetPasswordInput, ResetPasswordInput, VerifyUserInput , UpdateUserInput, VerifyResetCodeInput } from "../schema/user.schema";
 import { createUser, findUserByEmail, findUserById , updateUser , deleteUser , getAllUsersById , getAllUsers , getUsersByRole} from "../services/user.service";
 import { UserRole } from "../models/user.model";
 
@@ -97,25 +97,25 @@ export async function forgetPasswordHandler(
     const user = await findUserByEmail(email);
 
     if (!user) {
-      log.debug(`User with email ${email} does not exist`);
-      res.status(404).send(message);
+      res.status(404).send(`User with email ${email} does not exist`);
       return;
     }
 
     if (!user.verified) {
-      res.status(403).send("User is not verified");
+      res.status(403).json({message});
       return;
     }
 
-    const passwordResetCode = generate4DigitCode();
-    user.passwordResetCode = passwordResetCode;
+    const resetCode = generate4DigitCode();
+    user.passwordResetCode = resetCode;
+    user.resetPasswordExpires = new Date(Date.now() + 15 * 60 * 1000);
     await user.save();
 
     const url = await sendEmail({
       from: 'test@gmail.com',
       to: user.email,
       subject: "Reset your password",
-      text: `Password reset code: ${user.passwordResetCode}`
+      text: `Password reset code: ${user.passwordResetCode}\nThis code expires in 15 minutes.`
     });
 
     log.debug(`Password reset code sent to ${email}`);
@@ -132,26 +132,61 @@ export async function forgetPasswordHandler(
   }
 }
 
-export async function resetPasswordHandler(
-  req: Request<ResetPasswordInput["params"], {}, ResetPasswordInput["body"]>,
+export async function verifyResetCodeHandler(
+  req: Request<{}, {}, VerifyResetCodeInput>,
   res: Response
 ) {
-  const { email, passwordResetCode } = req.params;
-  const { password } = req.body;
+  const { email, passwordResetCode } = req.body;
 
   try {
     const user = await findUserByEmail(email);
 
-    if (!user || !user.passwordResetCode || user.passwordResetCode !== passwordResetCode) {
-      res.status(400).send("Could not reset user password");
+    if (!user ||
+      !user.passwordResetCode ||
+      user.passwordResetCode !== passwordResetCode ||
+      !user.resetPasswordExpires ||
+      user.resetPasswordExpires < new Date()
+    ) {
+      res.status(400).send("Invalid or expired reset code");
       return;
     }
 
     user.passwordResetCode = null;
+    await user.save();
+
+    res.status(200).json({ message: 'Valid code' });
+    return;
+  } catch (err) {
+    log.error(err, "Error in resetPasswordHandler");
+    res.status(500).send("Internal server error");
+    return;
+  }
+}
+
+export async function resetPasswordHandler(
+  req: Request<{}, {}, ResetPasswordInput>,
+  res: Response
+) {
+  const { email, password} = req.body;
+  
+
+  try {
+    const user = await findUserByEmail(email);
+
+    if (
+      !user ||
+      user.passwordResetCode !== null || // Ensure code was cleared (i.e., verified)
+      !user.resetPasswordExpires ||
+      user.resetPasswordExpires < new Date()
+    ) {
+      res.status(400).send(`Reset not allowed. Please request a new code.`);
+      return;
+    }
+
     user.password = password;
     await user.save();
 
-    res.status(200).send("Successfully updated password");
+    res.status(200).send("Password reset successful");
     return;
   } catch (err) {
     log.error(err, "Error in resetPasswordHandler");
