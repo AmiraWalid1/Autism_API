@@ -3,7 +3,7 @@ import { UserRole } from '../models/user.model';
 
 const appointmentSchema = z.object({
     day: z.string(),
-    available: z.string(),
+    available: z.boolean(),
     morning: z.string().optional(),
     evening: z.string().optional(),
 });

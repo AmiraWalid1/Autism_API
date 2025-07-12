@@ -110,7 +110,7 @@ export class Appointment {
     day: string;
 
     @prop({ required: true })
-    available: string;
+    available: boolean;
 
     @prop()
     morning: string;
