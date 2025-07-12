@@ -103,8 +103,8 @@ export class Doctor extends User {
 }
 
 export class Appointment {
-    @prop({ required: true })
-    _id: any; // Use `any` or a specific type (e.g., mongoose.Types.ObjectId)
+    // @prop({ required: true })
+    // _id: any; // Use `any` or a specific type (e.g., mongoose.Types.ObjectId)
 
     @prop({ required: true })
     day: string;
@@ -118,8 +118,8 @@ export class Appointment {
     @prop()
     evening: string; 
 
-    @prop({ required: true, enum: ['scheduled', 'completed', 'cancelled'] })
-    status: 'scheduled' | 'completed' | 'cancelled';
+    // @prop({ required: true, enum: ['scheduled', 'completed', 'cancelled'] })
+    // status: 'scheduled' | 'completed' | 'cancelled';
 }
 
 export class Parent extends User {
