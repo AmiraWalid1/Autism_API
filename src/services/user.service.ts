@@ -1,14 +1,15 @@
-import UserModel, { User, UserRole } from "../models/user.model";
+import { Model } from 'mongoose';
+import { User, UserRole, UserModel, DoctorModel, ParentModel } from "../models/user.model";
 
-export function createUser(input: Partial<User>) {
-    return UserModel.create(input);
+export function createUser(input: Partial<User>, Model: Model<any> = UserModel) {
+    return Model.create(input);
 }
 
-export function findUserById(id: string){
+export function findUserById(id: string) {
     return UserModel.findById(id);
 }
 
-export function findUserByEmail(email: string){
+export function findUserByEmail(email: string) {
     return UserModel.findOne({ email });
 }
 
@@ -30,5 +31,5 @@ export async function getAllUsers() {
 }
 
 export async function getUsersByRole(role: UserRole) {
-    return UserModel.find({ role }).select('-password -__v');
+    return UserModel.find({ role }).select('-privateFields');
 }

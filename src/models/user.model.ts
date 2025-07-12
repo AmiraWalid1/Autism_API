@@ -1,4 +1,4 @@
-import { getModelForClass, modelOptions, pre, prop, Severity, DocumentType, index } from "@typegoose/typegoose";
+import { getModelForClass, modelOptions, pre, prop, Severity, DocumentType, index, getDiscriminatorModelForClass } from "@typegoose/typegoose";
 import { v4 as uuidv4 } from 'uuid';
 import argon2 from 'argon2'
 import log from "../utils/logger";
@@ -76,7 +76,56 @@ export class User{
 
     }
 }
+export class Doctor extends User {
+    @prop({ required: true, enum: UserRole, default: UserRole.DOCTOR })
+    role: UserRole = UserRole.DOCTOR;
+
+    @prop({ required: true })
+    identityVerification: string; // e.g., URL or base64 string
+
+    @prop({ required: true })
+    selfiePhoto: string; // e.g., URL or base64 string
+
+    @prop({ required: true })
+    specialization: string; // e.g., "Cardiology"
+
+    @prop({ required: true })
+    description: string; // e.g., bio or services
+
+    @prop({ required: true })
+    clinicLocation: string; // e.g., address
+
+    @prop({ type: () => [Appointment], default: [] })
+    appointments: Appointment[];
+
+    @prop({ type: Number, min: 0, max: 5, default: 0 })
+    rating: number;
+}
+
+export class Appointment {
+    @prop({ required: true })
+    _id: any; // Use `any` or a specific type (e.g., mongoose.Types.ObjectId)
+
+    @prop({ required: true })
+    date: Date;
+
+    @prop({ required: true })
+    time: string;
+
+    @prop()
+    patientId?: string; // Reference to parent/child
+
+    @prop({ required: true, enum: ['scheduled', 'completed', 'cancelled'] })
+    status: 'scheduled' | 'completed' | 'cancelled';
+}
+
+export class Parent extends User {
+    @prop({ type: [String], default: [] })
+    children: string[]; // Array of child IDs (e.g., references to other User documents)
+}
 
 const UserModel = getModelForClass(User);
+const DoctorModel = getDiscriminatorModelForClass(UserModel, Doctor, UserRole.DOCTOR);
+const ParentModel = getDiscriminatorModelForClass(UserModel, Parent, UserRole.PARENT);
 
-export default UserModel;
+export { UserModel, DoctorModel, ParentModel };

@@ -1,100 +1,169 @@
-import {z} from 'zod';
+import { z } from 'zod';
 import { UserRole } from '../models/user.model';
 
+const appointmentSchema = z.object({
+    _id: z.any(), // Could be refined to mongoose.Types.ObjectId if needed
+    date: z.string().transform((val) => new Date(val)).refine((val) => !isNaN(val.getTime()), {
+        message: "Invalid date format",
+    }),
+    time: z.string(),
+    patientId: z.string().optional(),
+    status: z.enum(['scheduled', 'completed', 'cancelled']),
+});
 
 export const createUserSchema = z.object({
-    body: z.object({
-        name: z.string({
-            required_error: "Name is required"
-        }),
-
-        email: z.string({
-            required_error: "Email is required"
+    body: z
+        .object({
+            name: z.string({
+                required_error: "Name is required",
+            }),
+            email: z
+                .string({
+                    required_error: "Email is required",
+                })
+                .email("Invalid Email")
+                .transform((val) => val.toLowerCase()),
+            password: z
+                .string({
+                    required_error: "Password is required",
+                })
+                .min(6, "Password is too short - should be min 6 chars"),
+            passwordConfirmation: z.string({
+                required_error: "Password confirmation is required",
+            }),
+            phoneNumber: z.number({
+                required_error: "Phone Number is required",
+            }),
+            role: z.nativeEnum(UserRole),
+            identityVerification: z
+                .string({
+                    required_error: "Identity verification is required for doctors",
+                })
+                .optional(),
+            selfiePhoto: z
+                .string({
+                    required_error: "Selfie photo is required for doctors",
+                })
+                .optional(),
+            specialization: z
+                .string({
+                    required_error: "Specialization is required for doctors",
+                })
+                .optional(),
+            description: z
+                .string({
+                    required_error: "Description is required for doctors",
+                })
+                .optional(),
+            clinicLocation: z
+                .string({
+                    required_error: "Clinic location is required for doctors",
+                })
+                .optional(),
+            appointments: z.array(appointmentSchema).optional(),
+            rating: z.number().min(0).max(5).optional(),
+            children: z.array(z.string()).optional(),
         })
-        .email("Invalid Email")
-        .transform((val) => val.toLowerCase()),
-
-        password: z.string({
-            required_error: "Password is required"
+        .refine((data) => data.password === data.passwordConfirmation, {
+            message: "Passwords do not match",
+            path: ["passwordConfirmation"],
         })
-        .min(6, "Password is too short - should be min 6 chars"),
-        
-        passwordConfirmation: z.string({
-            required_error: "Password confirmation is required",
-        }),
-
-        phoneNumber: z.number({
-            required_error: "Phone Number is required"
-        }),
-
-        role: z.nativeEnum(UserRole)
-    }).refine((data) => data.password === data.passwordConfirmation, {
-        message: "Passwords do not match",
-        path: ["passwordConfirmation"],
-    }),
-})
+        .refine(
+            (data) =>
+                data.role !== UserRole.DOCTOR ||
+                (data.identityVerification && data.selfiePhoto && data.specialization && data.description && data.clinicLocation),
+            {
+                message: "Identity verification, selfie photo, specialization, description, and clinic location are required for doctors",
+                path: ["identityVerification", "selfiePhoto", "specialization", "description", "clinicLocation"],
+            }
+        )
+        .refine(
+            (data) =>
+                data.role !== UserRole.PARENT ||
+                (data.children !== undefined),
+            {
+                message: "Children array is required for parents",
+                path: ["children"],
+            }
+        ),
+});
 
 export const verifyUserSchema = z.object({
     params: z.object({
-        email: z.string({
-            required_error: "Email is required"
-        })
-        .email("Invalid Email")
-        .transform((val) => val.toLowerCase()),
-
+        email: z
+            .string({
+                required_error: "Email is required",
+            })
+            .email("Invalid Email")
+            .transform((val) => val.toLowerCase()),
         verificationCode: z.string({
-            required_error: "verificationCode is required"
-        })
-    })
+            required_error: "verificationCode is required",
+        }),
+    }),
 });
 
 export const forgotPasswordSchema = z.object({
-  body: z.object({
-    email: z.string({
-      required_error: 'Email is required',
-    }).email('Invalid Email'),
-  }),
+    body: z.object({
+        email: z
+            .string({
+                required_error: 'Email is required',
+            })
+            .email('Invalid Email'),
+    }),
 });
 
 export const verifyResetCodeSchema = z.object({
-  body: z.object({
-    email: z.string({
-      required_error: 'Email is required',
-    })
-      .email('Invalid Email')
-      .transform((val) => val.toLowerCase()),
-    passwordResetCode: z.string({
-      required_error: 'Reset code is required',
-    })
-      .length(4, 'Code must be exactly 4 digits')
-      .regex(/^\d{4}$/, 'Code must be numeric'),
-  }),
+    body: z.object({
+        email: z
+            .string({
+                required_error: 'Email is required',
+            })
+            .email('Invalid Email')
+            .transform((val) => val.toLowerCase()),
+        passwordResetCode: z
+            .string({
+                required_error: 'Reset code is required',
+            })
+            .length(4, 'Code must be exactly 4 digits')
+            .regex(/^\d{4}$/, 'Code must be numeric'),
+    }),
 });
 
 export const resetPasswordSchema = z.object({
-  body: z.object({
-    email: z.string({
-      required_error: 'Email is required',
-    })
-      .email('Invalid Email')
-      .transform((val) => val.toLowerCase()),
-    password: z.string({
-      required_error: 'Password is required',
-    }).min(6, 'Password is too short - should be min 6 chars'),
-    passwordConfirmation: z.string({
-      required_error: 'Password confirmation is required',
+    body: z.object({
+        email: z
+            .string({
+                required_error: 'Email is required',
+            })
+            .email('Invalid Email')
+            .transform((val) => val.toLowerCase()),
+        password: z
+            .string({
+                required_error: 'Password is required',
+            })
+            .min(6, 'Password is too short - should be min 6 chars'),
+        passwordConfirmation: z.string({
+            required_error: 'Password confirmation is required',
+        }),
+    }).refine((data) => data.password === data.passwordConfirmation, {
+        message: 'Passwords do not match',
+        path: ['passwordConfirmation'],
     }),
-  }).refine((data) => data.password === data.passwordConfirmation, {
-    message: 'Passwords do not match',
-    path: ['passwordConfirmation'],
-  }),
 });
 
 export const updateUserSchema = z.object({
     body: z.object({
         name: z.string().optional(),
-        email: z.string().email("Invalid Email").optional(), 
-        phoneNumber: z.number().optional(), 
+        email: z.string().email("Invalid Email").optional(),
+        phoneNumber: z.number().optional(),
+        identityVerification: z.string().optional(),
+        selfiePhoto: z.string().optional(),
+        specialization: z.string().optional(),
+        description: z.string().optional(),
+        clinicLocation: z.string().optional(),
+        appointments: z.array(appointmentSchema).optional(),
+        rating: z.number().min(0).max(5).optional(),
+        children: z.array(z.string()).optional(),
     }),
 });
 
