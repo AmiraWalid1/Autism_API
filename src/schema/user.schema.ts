@@ -1,6 +1,13 @@
 import { z } from 'zod';
 import { UserRole } from '../models/user.model';
 
+const appointmentSchema = z.object({
+    day: z.string(),
+    available: z.string(),
+    morning: z.string().optional(),
+    evening: z.string().optional(),
+});
+
 export const createUserSchema = z.object({
     body: z
         .object({
@@ -40,6 +47,7 @@ export const createUserSchema = z.object({
             clinicLocation: z
                 .string()
                 .optional(),
+            appointments: z.array(appointmentSchema).optional(),
             rating: z.number().min(0).max(5).optional(),
             children: z.array(z.string()).optional(),
         })
