@@ -1,16 +1,6 @@
 import { z } from 'zod';
 import { UserRole } from '../models/user.model';
 
-const appointmentSchema = z.object({
-    _id: z.any(), // Could be refined to mongoose.Types.ObjectId if needed
-    date: z.string().transform((val) => new Date(val)).refine((val) => !isNaN(val.getTime()), {
-        message: "Invalid date format",
-    }),
-    time: z.string(),
-    patientId: z.string().optional(),
-    status: z.enum(['scheduled', 'completed', 'cancelled']),
-});
-
 export const createUserSchema = z.object({
     body: z
         .object({
@@ -50,7 +40,6 @@ export const createUserSchema = z.object({
             clinicLocation: z
                 .string()
                 .optional(),
-            appointments: z.array(appointmentSchema).optional(),
             rating: z.number().min(0).max(5).optional(),
             children: z.array(z.string()).optional(),
         })
