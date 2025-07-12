@@ -58,24 +58,7 @@ export const createUserSchema = z.object({
             message: "Passwords do not match",
             path: ["passwordConfirmation"],
         })
-        .refine(
-            (data) =>
-                data.role !== UserRole.DOCTOR ||
-                (data.identityVerification && data.selfiePhoto && data.specialization && data.description && data.clinicLocation),
-            {
-                message: "Identity verification, selfie photo, specialization, description, and clinic location are required for doctors",
-                path: ["identityVerification", "selfiePhoto", "specialization", "description", "clinicLocation"],
-            }
-        )
-        .refine(
-            (data) =>
-                data.role !== UserRole.PARENT ||
-                (data.children !== undefined),
-            {
-                message: "Children array is required for parents",
-                path: ["children"],
-            }
-        ),
+        
 });
 
 export const verifyUserSchema = z.object({
