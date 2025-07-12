@@ -35,15 +35,9 @@ export const createUserSchema = z.object({
                 required_error: "Phone Number is required",
             }),
             role: z.nativeEnum(UserRole),
-            identityVerification: z
-                .string({
-                    required_error: "Identity verification is required for doctors",
-                })
-                .optional(),
+            identityVerification: z.string().optional(),
             selfiePhoto: z
-                .string({
-                    required_error: "Selfie photo is required for doctors",
-                })
+                .string()
                 .optional(),
             specialization: z
                 .string({
@@ -51,14 +45,10 @@ export const createUserSchema = z.object({
                 })
                 .optional(),
             description: z
-                .string({
-                    required_error: "Description is required for doctors",
-                })
+                .string()
                 .optional(),
             clinicLocation: z
-                .string({
-                    required_error: "Clinic location is required for doctors",
-                })
+                .string()
                 .optional(),
             appointments: z.array(appointmentSchema).optional(),
             rating: z.number().min(0).max(5).optional(),

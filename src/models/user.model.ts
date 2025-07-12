@@ -80,19 +80,19 @@ export class Doctor extends User {
     @prop({ required: true, enum: UserRole, default: UserRole.DOCTOR })
     role: UserRole = UserRole.DOCTOR;
 
-    @prop({ required: true })
+    @prop()
     identityVerification: string; // e.g., URL or base64 string
 
-    @prop({ required: true })
+    @prop()
     selfiePhoto: string; // e.g., URL or base64 string
 
     @prop({ required: true })
     specialization: string; // e.g., "Cardiology"
 
-    @prop({ required: true })
+    @prop()
     description: string; // e.g., bio or services
 
-    @prop({ required: true })
+    @prop()
     clinicLocation: string; // e.g., address
 
     @prop({ type: () => [Appointment], default: [] })
