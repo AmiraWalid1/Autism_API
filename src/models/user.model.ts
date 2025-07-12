@@ -107,13 +107,16 @@ export class Appointment {
     _id: any; // Use `any` or a specific type (e.g., mongoose.Types.ObjectId)
 
     @prop({ required: true })
-    date: Date;
+    day: string;
 
     @prop({ required: true })
-    time: string;
+    available: string;
 
     @prop()
-    patientId?: string; // Reference to parent/child
+    morning: string;
+    
+    @prop()
+    evening: string; 
 
     @prop({ required: true, enum: ['scheduled', 'completed', 'cancelled'] })
     status: 'scheduled' | 'completed' | 'cancelled';
